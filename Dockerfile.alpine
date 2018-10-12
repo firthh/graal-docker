@@ -1,0 +1,24 @@
+FROM alpine:3.8
+
+ENV GRAALVM_VERSION=1.0.0-rc7 \
+    GLIBC_REPO=https://github.com/sgerrand/alpine-pkg-glibc \
+    GLIBC_VERSION=2.28-r0
+
+RUN apk add curl && \
+  for pkg in glibc-${GLIBC_VERSION} glibc-bin-${GLIBC_VERSION} glibc-i18n-${GLIBC_VERSION}; do curl -sSL ${GLIBC_REPO}/releases/download/${GLIBC_VERSION}/${pkg}.apk -o /tmp/${pkg}.apk; done && \
+  apk add --allow-untrusted /tmp/*.apk && \
+  /usr/glibc-compat/bin/localedef --force --inputfile POSIX --charmap UTF-8 C.UTF-8 || true && \
+  curl -Ls "https://github.com/oracle/graal/releases/download/vm-${GRAALVM_VERSION}/graalvm-ce-${GRAALVM_VERSION}-linux-amd64.tar.gz" | \
+  tar zx -C /usr/local/ && \
+  mv /usr/local/graalvm-ce-${GRAALVM_VERSION}/jre /usr/local/jre && \
+  rm -rf /usr/local/graalvm-ce-${GRAALVM_VERSION} && \
+  rm -rf /usr/local/jre/languages && \
+  rm -rf /usr/local/jre/lib/svm && \
+  rm -rf /usr/local/jre/bin/polyglot && \
+  apk del curl glibc-i18n
+
+ENV PATH $PATH:/usr/local/jre/bin
+
+RUN java -Xshare:dump
+
+RUN java -version
