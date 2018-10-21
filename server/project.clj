@@ -10,4 +10,6 @@
   :ring {:handler server.handler/app}
   :profiles
   {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
-                        [ring/ring-mock "0.3.2"]]}})
+                        [ring/ring-mock "0.3.2"]]}
+   :uberjar {:aot :all}}
+  :uberjar-name "app.jar")

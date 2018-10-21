@@ -1,0 +1,14 @@
+FROM clojure as clj
+
+WORKDIR /srv
+
+COPY project.clj project.clj
+RUN lein deps
+COPY . .
+RUN lein ring uberjar
+
+FROM java:8-jre-alpine
+WORKDIR /srv
+COPY --from=clj /srv/target/app.jar /srv/app.jar
+
+CMD ["java" "-jar" "/srv/app.jar"]
